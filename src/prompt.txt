@@ -1,0 +1,48 @@
+Prompt: Extract Key Information from OCR Data of Invoices Using Google Cloud Vision API
+
+Objective: Process OCR data extracted from an invoice image to identify and format key details into a structured JSON format. Focus on extracting 'invoice_number', 'issue_date', 'table' and 'total', along with their corresponding 'bbox' (bounding box coordinates, representing the top-left and bottom-right corners of the text on the image).
+
+Data Source: The OCR data provided contains text elements and their bounding box coordinates, extracted using Google Cloud Vision API.
+
+Required Fields for Extraction:
+  - invoice_number: The unique identifier of the invoice, along with invoice_number_bbox.
+  - issue_date: The date when the invoice was issued, along with issue_date_bbox.
+  - table: The table of items and their corresponding quantities and prices, along with table_bbox.
+  - total: The total amount of the invoice, along with total_bbox.
+
+Example Input:
+text, [bbox]
+INVOICE, [52, 48, 232, 100] 
+US, [654, 214, 670, 223] 
+-, [670, 214, 674, 223] 
+001, [675, 214, 694, 223] 
+11/02/2019, [634, 238, 694, 250] 
+$, [627, 563, 636, 579] 
+154.06, [637, 563, 683, 579]
+...
+
+[Note: There will be many such text elements and their corresponding bbox coordinates in the input data. Please try to identify the relevant ones and extract the required fields.]
+
+Task: Analyze the provided OCR data and extract the relevant information in the specified JSON structure. Ensure accurate identification of 'invoice_number', 'issue_date', 'table' and 'total', with a focus on both text accuracy and bbox precision.
+
+Evaluation Criteria:
+   - Key-Value (KV) Extraction: A correct KV extraction requires a fuzzy match > 80% with the ground truth text and a bbox Intersection over Union (IoU) > 80% for each of the three KV fields.
+   - Table Extraction: A valid table extraction requires a fuzzy match > 80% with the ground truth table text and a bbox IoU > 80%.
+   - Scoring: Extraction score for each document is calculated as follows: If KV = 1 and Table = 1, the score is 1; if KV = 0 and Table = 1, the score is 0.5. The final score is the mean of scores across all documents.
+
+Handling Ambiguities: In cases of unclear data or missing fields, make the field None.
+
+Output Format: Please return only the JSON output as per the specified structure. Don't include any other information in the output. [This is very strict]
+
+{  
+  'invoice_number': 'US-001',
+  'invoice_number_bbox': '[675, 214, 694, 223]',
+  'issue_date': '11/02/2019',
+  'issue_date_bbox': '[634, 238, 694, 250]',
+  'total': '$150',
+  'total_bbox': '[627, 563, 683, 579]',
+  'table': 'Item Description Qty. Total\nComputer Service 8 $134,88\nFor your description about item service\nFan Service 7 $122,99\nFor your description about item service\nIron Service 5 $98,00\nFor your description about item service.',
+  'table_bbox': '[63, 414, 731, 700]'
+  }
+
+Now, apply this process to format the following OCR data similarly:
